@@ -1,6 +1,6 @@
 use nu_engine::{get_full_help, CallExt};
+use nu_parser::escape_quote_string;
 use nu_parser::parse;
-use nu_parser::{escape_for_script_arg, escape_quote_string};
 use nu_protocol::report_error;
 use nu_protocol::{
     ast::{Call, Expr, Expression, PipelineElement},
@@ -49,12 +49,7 @@ pub(crate) fn gather_commandline_args() -> (Vec<String>, String, Vec<String>) {
         }
     }
 
-    let args_to_script = if !script_name.is_empty() {
-        args.map(|arg| escape_for_script_arg(&arg)).collect()
-    } else {
-        Vec::default()
-    };
-    (args_to_nushell, script_name, args_to_script)
+    (args_to_nushell, script_name, args.collect())
 }
 
 pub(crate) fn parse_commandline_args(
