@@ -329,3 +329,36 @@ fn main_script_can_have_subcommands2() {
         assert!(actual.out.contains("usage: script.nu"));
     })
 }
+
+#[test]
+fn main_script_accepts_delimiters() {
+    Playground::setup("main_script_accepts_delimiters", |dirs, sandbox| {
+        sandbox.mkdir("main_script_accepts_delimiters");
+        sandbox.with_files(vec![FileWithContent(
+            "script.nu",
+            r#"
+                def main [a] { $a }
+            "#,
+        )]);
+
+        let arg_expected_pairs = vec![
+            ("'\"'", "\""),
+            ("\"'\"", "'"),
+            ("'`'", "`"),
+            ("'('", "("),
+            ("'{'", "{"),
+            ("'['", "["),
+            ("'\"\"'", "\"\""),
+            ("\"''\"", "''"),
+            ("'``'", "``"),
+            ("'()'", "()"),
+            ("'{}'", "{}"),
+            ("'[]'", "[]"),
+        ];
+
+        for (arg, expected) in arg_expected_pairs {
+            let actual = nu!(cwd: dirs.test(), pipeline(&format!("nu script.nu {}", arg)));
+            assert_eq!(actual.out, expected);
+        }
+    })
+}
